@@ -270,8 +270,24 @@ function beep(freqs, dur=0.12, type="sine", gain=0.18){
 }
 const sndLink    = ()=> beep([523,784], 0.12, "triangle", 0.18);
 const sndCorrect = ()=> beep([523,659,784,1047], 0.13, "triangle", 0.2);
-const sndWrong   = ()=> beep([330,247], 0.16, "sine", 0.16);
 const sndPop     = ()=> beep([880,1175], 0.12, "triangle", 0.18);
+/* まちがい: ブッ・ブー の ブザー（ひくい のこぎり波で 2はつ）*/
+function sndWrong(){
+  if(!state.sound) return;
+  const a = audio(); if(!a) return;
+  const t = a.currentTime;
+  [[0, 196, 0.12],[0.17, 156, 0.36]].forEach(([off,freq,dur])=>{
+    const o=a.createOscillator(), g=a.createGain();
+    o.type="sawtooth"; o.frequency.value=freq;
+    const st=t+off;
+    o.connect(g); g.connect(a.destination);
+    g.gain.setValueAtTime(0, st);
+    g.gain.linearRampToValueAtTime(0.15, st+0.02);
+    g.gain.setValueAtTime(0.15, st+dur-0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, st+dur);
+    o.start(st); o.stop(st+dur+0.02);
+  });
+}
 
 /* よみあげ */
 function say(text){
